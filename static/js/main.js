@@ -1,14 +1,13 @@
-// if ('serviceWorker' in navigator) {
-//     navigator.serviceWorker.register('serviceWorker.js', { scope: '/' }).then(function(reg) {
-//         console.log('Registration succeeded. Scope is ' + reg.scope);
-//     }).catch(function(error) {
-//
-//         console.log('Registration failed with ' + error);
-//     });
-// }
+if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register('serviceWorker.js', { scope: '/' }).then(function(reg) {
+        console.log('Registration succeeded. Scope is ' + reg.scope);
+    }).catch(function(error) {
+
+        console.log('Registration failed with ' + error);
+    });
+}
 
 
-let intervalNotify;
 let conferenceList = fillConferenceList();
 
 
@@ -17,7 +16,6 @@ Date.prototype.withoutTime = function () {
     d.setHours(0, 0, 0, 0);
     return d;
 }
-
 let now = new Date().withoutTime();
 
 $('select').on('change', function () {
@@ -116,32 +114,44 @@ function filterItems(id, date) {
 
 }
 
-workConferenceList(conferenceList)
-//недоработано
+
 function workConferenceItems(conferenceList) {
 
-
-    conferenceList.forEach(function (item) {
+    conferenceList = conferenceList.filter(function (item) {
         if (item.dayInterval) {
-            let dateNotify = differenceInDays(item.date, item.dayInterval);
-            if (+dateNotify === +now) {
-                let serialObj = JSON.stringify(item);  //тест хранения
-
-                localStorage.setItem("Conference", serialObj);
-                notifyMe(item);
-                let conferenceData = JSON.parse(localStorage.getItem("Conference"));
-                if (localStorage.getItem('Conference')) {
-                    $('#' + conferenceData.id).find('.conference-name').text('Hello from local storage');
-                }
-            }
-
+            return item;
         }
-
     });
 
+    let serialObj = JSON.stringify(conferenceList);
+    let serial
+    console.log(conferenceList);
+    if (localStorage.length) {
+        let updateList = JSON.parse(localStorage.getItem("Conference"));
+        localStorage.clear();
+        console.log(updateList);
+
+
+        serialObj = JSON.stringify(conferenceList)
+        serial = JSON.stringify(updateList)
+    }
+    localStorage.setItem("Update", serial);
+    localStorage.setItem("Conference", serialObj);
 }
 
+workConferenceList(conferenceList)
 
+
+if (localStorage.length) {
+    let conferenceData = JSON.parse(localStorage.getItem("Conference"));
+
+    conferenceData.forEach(function (item) {
+        let dateNotify = differenceInDays(item.date, item.dayInterval);
+        if (+dateNotify === +now) {
+            notifyMe(item);
+        }
+    });
+}
 
 
 function workConferenceList(conferenceList) {
